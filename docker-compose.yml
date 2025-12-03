@@ -1,0 +1,24 @@
+services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: EqUWXwsmExrl
+      POSTGRES_DB: pern_ecommerce
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  pg_admin:
+    image: dpage/pgadmin4
+    ports:
+      - "8080:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: naimulcsx@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: testingpassword
+    depends_on:
+      - db
+
+volumes:
+  db_data:
