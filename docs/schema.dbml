@@ -1,0 +1,124 @@
+Table users {
+  id UUID [pk, default: `uuid_generate_v4()`]
+  email VARCHAR(255) [not null, unique, note: "User's email address (login identifier)"]
+  first_name VARCHAR(100) [not null]
+  last_name VARCHAR(100) [not null]
+  password_hash VARCHAR(255) [not null, note: "Hashed password"]
+  created_at TIMESTAMP [not null, default: `NOW()`]
+  updated_at TIMESTAMP [not null, default: `NOW()`]
+}
+
+Table user_addresses {
+  id UUID [pk, default: `uuid_generate_v4()`]
+  user_id UUID [not null, ref: > users.id]
+  full_name VARCHAR(200) [not null]
+  address_label VARCHAR(50) [note: "Optional label (e.g, 'Home', 'Work')"]
+  address_line1 VARCHAR(255) [not null]
+  address_line2 VARCHAR(255)
+  city VARCHAR(100) [not null]
+  state VARCHAR(100) [not null]
+  postal_code VARCHAR(20) [not null]
+  country VARCHAR(100) [not null]
+  phone_number VARCHAR(50) [not null]
+  is_default BOOLEAN [default: false]
+  created_at TIMESTAMP [not null, default: `NOW()`]
+  updated_at TIMESTAMP [not null, default: `NOW()`]
+}
+
+Table categories {
+  id UUID [pk, default: `uuid_generate_v4()`]
+  name VARCHAR(100) [not null]
+  slug VARCHAR(255) [not null, unique]
+  parent_id UUID [ref: > categories.id, note: "Self-referencing FK for subcategories"]
+  description TEXT
+  image_url VARCHAR(255) [not null]
+  created_at TIMESTAMP [not null, default: `NOW()`]
+  updated_at TIMESTAMP [not null, default: `NOW()`]
+}
+
+Table products {
+  id UUID [pk, default: `uuid_generate_v4()`]
+  category_id UUID [not null, ref: > categories.id]
+  title VARCHAR(255) [not null]
+  slug VARCHAR(255) [not null, unique]
+  description TEXT
+  base_price DECIMAL(10, 2) [not null]
+  original_price DECIMAL(10, 2)
+  stock_quantity INTEGER [not null, default: 0]  
+  specifications JSONB [note: "Key-value pairs for specs"]
+  is_featured BOOLEAN [default: false]
+  is_active BOOLEAN [default: true]
+  created_at TIMESTAMP [not null, default: `NOW()`]
+  updated_at TIMESTAMP [not null, default: `NOW()`]
+}
+
+Table product_images {
+  id UUID [pk, default: `uuid_generate_v4()`]
+  product_id UUID [not null, ref: > products.id]
+  image_url VARCHAR(255) [not null]
+  alt_text VARCHAR(255)
+  display_order INTEGER [default: 0]
+  is_primary BOOLEAN [default: false]
+  created_at TIMESTAMP [not null, default: `NOW()`]
+  updated_at TIMESTAMP [not null, default: `NOW()`]
+}
+
+Table product_variants {
+  id UUID [pk, default: `uuid_generate_v4()`]
+  product_id UUID [not null, ref: > products.id]
+  variant_name VARCHAR(50) [not null, note: "e.g. 'Color', 'Size'"]
+  variant_value VARCHAR(50) [not null, note: "e.g. 'Black', 'Silver'"]
+  price_adjustment DECIMAL(10, 2) [default: 0.00]
+  stock_quantity INTEGER [default: 0]
+  image_url VARCHAR(255)
+}
+
+Table carts {
+  id UUID [pk, default: `uuid_generate_v4()`]
+  user_id UUID [ref: -  users.id]
+  session_id VARCHAR(255)
+  created_at TIMESTAMP [not null, default: `NOW()`]
+  updated_at TIMESTAMP [not null, default: `NOW()`]
+}
+
+Table cart_items {
+  id UUID [pk, default: `uuid_generate_v4()`]
+  cart_id UUID [not null, ref: > carts.id]
+  product_id UUID [not null, ref: > products.id]
+  variant_id UUID [ref: > product_variants.id]
+  quanity INTEGER [not null, default: 1]
+  added_at TIMESTAMP [not null, default: `NOW()`] 
+}
+
+Table orders {
+  id UUID [pk, default: `uuid_generate_v4()`]
+  user_id UUID [not null, ref: > users.id]
+  status VARCHAR(50) [not null]
+  total_amount DECIMAL(10, 2) [not null]
+  shipping_address_snapshot JSONB [not null]
+  payment_method VARCHAR(50) [not null]
+  payment_status VARCHAR(50) [not null, default: 'pending']
+  created_at TIMESTAMP [not null, default: `NOW()`]
+  updated_at TIMESTAMP [not null, default: `NOW()`]
+}
+
+Table order_items {
+  id UUID [pk, default: `uuid_generate_v4()`]
+  order_id UUID [not null, ref: > orders.id]
+  product_id UUID [ref: > products.id]
+  product_snapshot JSONB [not null, note: "Full snapshot of product data"]
+  variant_snapshot JSOB [not null, note: "Full snapshot of selected variant"]
+  quantity INTEGER [not null]
+  price_at_purchase DECIMAL(10, 2) [not null]
+  total_price DECIMAL(10, 2) [not null]
+}
+
+Table reviews {
+  id UUID [pk, default: `uuid_generate_v4()`]
+  product_id UUID [not null, ref: > products.id]
+  user_id UUID [not null, ref: > users.id]
+  rating INTEGER [not null, note: "Check: rating >= 1 AND rating <= 5"]
+  comment TEXT
+  is_verified_purchase BOOLEAN [default: false]
+  created_at TIMESTAMP [not null, default: `NOW()`] 
+}
