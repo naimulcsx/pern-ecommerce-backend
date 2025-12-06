@@ -1,0 +1,28 @@
+{
+  "name": "pern-ecommerce-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naimulcsx/pern-ecommerce-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/naimulcsx/pern-ecommerce-backend/issues"
+  },
+  "homepage": "https://github.com/naimulcsx/pern-ecommerce-backend#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
