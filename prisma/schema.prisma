@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Table users {
+//    id UUID [pk, default: `uuid_generate_v4()`]
+//    email VARCHAR(255) [not null, unique, note: "User's email address (login identifier)"]
+//    first_name VARCHAR(100) [not null]
+//    last_name VARCHAR(100) [not null]
+//    password_hash VARCHAR(255) [not null, note: "Hashed password"]
+//    created_at TIMESTAMP [not null, default: `NOW()`]
+//    updated_at TIMESTAMP [not null, default: `NOW()`]
+// }
+
+model User {
+  id String @id @default(uuid()) @db.Uuid()
+  email String @unique @db.VarChar(255)
+  firstName String @db.VarChar(100)
+  lastName String @db.VarChar(100)
+  passwordHash String @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserAddress {
+  id String @id @default(uuid()) @db.Uuid()
+}
