@@ -13,7 +13,7 @@ export const authMiddleware = (req, res, next) => {
     
     jwt.verify(accessToken, secretKey, async (err, decoded) => {
         if (err) {
-            return res.status(401).json({ status: 'error', message: 'Unauthorized' });
+            return res.status(401).json({ status: 'error', message: 'Unauthorized11' });
         }
 
         const userId = decoded.sub;
@@ -26,10 +26,14 @@ export const authMiddleware = (req, res, next) => {
                 passwordHash: true
             }
         });
+
+        console.log('Authenticated User:', user);
         
         if (!user) {
             return res.status(404).json({ status: 'error', message: 'User not found' });
         }
+
+
 
         req.user = user;
 

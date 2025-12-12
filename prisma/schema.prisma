@@ -23,6 +23,12 @@ datasource db {
 //    updated_at TIMESTAMP [not null, default: `NOW()`]
 // }
 
+enum UserRole {
+  ADMIN
+  CUSTOMER
+}
+
+
 model User {
   id String @id @default(uuid()) @db.Uuid()
   email String @unique @db.VarChar(255)
@@ -31,4 +37,31 @@ model User {
   passwordHash String @db.VarChar(255)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  role UserRole @default(CUSTOMER)
+}
+
+model Product {
+  id String @id @default(uuid()) @db.Uuid()
+  name String @db.VarChar(255)
+  description String @db.Text()
+  price Float
+  stock Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  categoryId String @db.Uuid()
+  
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+}
+
+model Category {
+  id String @id @default(uuid()) @db.Uuid()
+  name String @unique @db.VarChar(255)
+  description String @db.Text()
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
 }
