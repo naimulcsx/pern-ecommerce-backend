@@ -28,7 +28,7 @@ export const getACategory = async (req, res) => {
   }
 
   const category = await prisma.category.findUnique({
-    where: { id: categoryId }
+    where: { id: categoryId },
   })
 
   if (!category) {
@@ -45,11 +45,17 @@ export const getACategory = async (req, res) => {
   })
 }
 
+
 export const createCategory = async (req, res) =>{
+  const { name, slug, description, imageUrl, parentId } = req.body;
+
 
   const categoryCreateSchema = z.object({
     name: z.string().min(3),
-    description: z.string().min(5)
+    slug: z.string().min(3),
+    description: z.string().min(5),
+    imageUrl: z.url(),
+    parentId: z.uuid().optional()
   })
 
   const { success, data, error } = categoryCreateSchema.safeParse(req.body);
@@ -58,13 +64,16 @@ export const createCategory = async (req, res) =>{
   if (!success){
     res.status(400).json({
       status: 'error',
-      message: 'Bad request',
+      message: 'Bad request payload must have name, slug, description, imageUrl, and optionally parentId',
     })
   }
 
   const categoryPayload = {
     name: data.name,
-    description: data.description
+    slug: data.slug,
+    description: data.description,
+    imageUrl: data.imageUrl,
+    parentId: data.parentId
   }
 
   const createdCategory = await prisma.category.create({
@@ -80,6 +89,7 @@ export const createCategory = async (req, res) =>{
 }
 
 export const updateCategory = async (req, res) =>{
+  // Assignment please update the code here
   const categoryId = req.params.id;
 
 

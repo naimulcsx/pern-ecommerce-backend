@@ -1,9 +1,9 @@
-import { prisma } from '../database/prisma.js'
+import { prisma } from '../../database/prisma.js'
 import { z } from 'zod'
 
 export const getAllProduct = async (req, res) =>{
 
-  const products = await prisma.product.findMany()
+  const products = await prisma.product.findMany({  })
 
   res.json({
     status: 'success',
@@ -30,7 +30,12 @@ export const getAProduct = async (req, res) =>{
 
 
   const product = await prisma.product.findUnique({
-    where: { id: productId }
+    where: { id: productId },
+    include: {
+      category: true,
+      images: true,
+      variants: true
+    }
   })
 
   if (!product) {
@@ -47,22 +52,32 @@ export const getAProduct = async (req, res) =>{
   })
 }
 
+
 export const createProduct = async (req, res) =>{
+  console.log("I am here");
+
   const productCreateSchema = z.object({
-    name: z.string().min(3),
+    title: z.string().min(3),
+    slug: z.string().min(3),
     description: z.string().min(5),
-    price: z.number().positive(),
-    stock: z.number().int(),
+    basePrice: z.number().positive(),
+    originalPrice: z.number().positive().optional(),
+    stockQuantity: z.number().int().nonnegative(),
+    specifications: z.any(),
+    isFeatured: z.boolean().optional(),
+    isActive: z.boolean().optional(),
     categoryId: z.uuid()
   })
 
   const { success, data, error } = productCreateSchema.safeParse(req.body);
 
+  console.log(error);
+
   // validation failed 
   if (!success){
     res.status(400).json({
       status: 'error',
-      message: 'Bad request payload should have name, description, price, stock and categoryId',
+      message: 'Bad request payload should have title, slug, description, basePrice, originalPrice, stockQuantity, specifications, isFeatured, isActive, and categoryId',
     })
   }
 
@@ -74,15 +89,20 @@ export const createProduct = async (req, res) =>{
   if(!category){
     res.json({
       status: 'error',
-      message: 'Bad request'
+      message: 'Bad request invalid categoryId',
     })
   }
 
   const productPayload = {
-    name: data.name,
+    title: data.title,
+    slug: data.slug,
     description: data.description,
-    price: data.price,
-    stock: data.stock,
+    basePrice: data.basePrice,
+    originalPrice: data.originalPrice,
+    stockQuantity: data.stockQuantity,
+    specifications: data.specifications,
+    isFeatured: data.isFeatured ?? false,
+    isActive: data.isActive ?? true,
     categoryId: data.categoryId
   }
 
@@ -98,7 +118,8 @@ export const createProduct = async (req, res) =>{
 
 }
 
-export const updateProduct = async (req, res) =>{
+export const updateProduct = async (req, res) => {
+  // assignment please update accordingly the new product schema
   const productId = req.params.id;
 
   const productSchema = z.object({

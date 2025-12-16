@@ -39,29 +39,110 @@ model User {
   updatedAt DateTime @updatedAt
 
   role UserRole @default(CUSTOMER)
+  cart Cart[]
 }
+
 
 model Product {
   id String @id @default(uuid()) @db.Uuid()
-  name String @db.VarChar(255)
+  title String @db.VarChar(255)
+  slug String @unique @db.VarChar(255)
   description String @db.Text()
-  price Float
-  stock Int
+  basePrice Float
+  originalPrice Float?
+  stockQuantity Int @default(0)
+  specifications Json
+  isFeatured Boolean @default(false)
+  isActive Boolean @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   categoryId String @db.Uuid()
-  
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
+  images ProductImage[]
+  variants ProductVariant[]
+  cartItems CartItem[]
 }
+
 
 model Category {
   id String @id @default(uuid()) @db.Uuid()
-  name String @unique @db.VarChar(255)
+  name String @db.VarChar(100)
+  slug String @unique @db.VarChar(255)
   description String @db.Text()
+  imageUrl String @db.VarChar(255)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  parentId String? @db.Uuid()
+  parent Category? @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: Cascade)
+  subcategories Category[] @relation("CategoryToCategory")
+
   products Product[]
 
+}
+
+
+model ProductImage {
+  id String @id @default(uuid()) @db.Uuid()
+  productId String @db.Uuid()
+  imageUrl String @db.VarChar(255)
+  altText String? @db.VarChar(255)
+  displayOrder Int @default(0)
+  isPrimary Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+
+model ProductVariant {
+  id String @id @default(uuid()) @db.Uuid()
+  productId String @db.Uuid()
+  variantName String @db.VarChar(50)
+  variantValue String @db.VarChar(50)
+  priceAdjustment Float @default(0.00)
+  stockQuantity Int @default(0)
+  imageUrl String? @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+}
+
+
+// Table carts {
+//   id UUID [pk, default: `uuid_generate_v4()`]
+//   user_id UUID [ref: -  users.id]
+//   session_id VARCHAR(255)
+//   created_at TIMESTAMP [not null, default: `NOW()`]
+//   updated_at TIMESTAMP [not null, default: `NOW()`]
+// }
+
+model Cart {
+  id String @id @default(uuid()) @db.Uuid()
+  userId String? @db.Uuid()
+  sessionId String? @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+}
+
+
+model CartItem {
+  id String @id @default(uuid()) @db.Uuid()
+  cartId String @db.Uuid()
+  productId String @db.Uuid()
+  variantId String? @db.Uuid()
+  quantity Int @default(1)
+  addedAt DateTime @default(now())
+
+  cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
 }
