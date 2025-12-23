@@ -22,12 +22,11 @@ export const getAProduct = async (req, res) =>{
   const { success, data, error } = productSchema.safeParse({ id: productId });
 
   if (!success){
-    res.status(400).json({
+    return res.status(400).json({
       status: 'error',
-      message: 'Bad request',
+      message: 'Bad request: Invalid UUID format',
     })
   }
-
 
   const product = await prisma.product.findUnique({
     where: { id: productId },
@@ -75,9 +74,9 @@ export const createProduct = async (req, res) =>{
 
   // validation failed 
   if (!success){
-    res.status(400).json({
+    return res.status(400).json({
       status: 'error',
-      message: 'Bad request payload should have title, slug, description, basePrice, originalPrice, stockQuantity, specifications, isFeatured, isActive, and categoryId',
+      message: 'Bad request: ' + error.errors.map(e => e.message).join(', '),
     })
   }
 
@@ -87,9 +86,9 @@ export const createProduct = async (req, res) =>{
   })
 
   if(!category){
-    res.json({
+    return res.status(400).json({
       status: 'error',
-      message: 'Bad request invalid categoryId',
+      message: 'Bad request: Invalid categoryId',
     })
   }
 
@@ -129,26 +128,43 @@ export const updateProduct = async (req, res) => {
   const { success: paramSuccess, data: paramData, error: paramError } = productSchema.safeParse({ id: productId });
 
   if (!paramSuccess){
-    res.status(400).json({
+    return res.status(400).json({
       status: 'error',
-      message: 'Bad request',
+      message: 'Bad request: Invalid UUID format',
     })
   }
 
   const productUpdateSchema = z.object({
-    name: z.string().min(3).optional(),
+    title: z.string().min(3).optional(),
+    slug: z.string().min(3).optional(),
     description: z.string().min(5).optional(),
-    price: z.number().positive().optional(),
-    stock: z.number().int().optional(),
+    basePrice: z.number().positive().optional(),
+    originalPrice: z.number().positive().optional(),
+    stockQuantity: z.number().int().nonnegative().optional(),
+    specifications: z.any().optional(),
+    isFeatured: z.boolean().optional(),
+    isActive: z.boolean().optional(),
     categoryId: z.uuid().optional()
   })
 
   const { success: bodySuccess, data: bodyData, error: bodyError } = productUpdateSchema.safeParse(req.body);
 
   if (!bodySuccess){
-    res.status(400).json({
+    return res.status(400).json({
       status: 'error',
-      message: 'Bad request payload should have name, description, price, stock and categoryId',
+      message: 'Bad request: ' + bodyError.errors.map(e => e.message).join(', '),
+    })
+  }
+
+  // Check if product exists
+  const existingProduct = await prisma.product.findUnique({
+    where: { id: productId }
+  });
+
+  if (!existingProduct) {
+    return res.status(404).json({
+      status: 'error',
+      message: 'Product not found',
     })
   }
 
@@ -174,9 +190,21 @@ export const deleteProduct = async (req, res) =>{
   const { success, data, error } = productSchema.safeParse({ id: productId });
 
   if (!success){
-    res.status(400).json({
+    return res.status(400).json({
       status: 'error',
-      message: 'Bad request',
+      message: 'Bad request: Invalid UUID format',
+    })
+  }
+
+  // Check if product exists
+  const existingProduct = await prisma.product.findUnique({
+    where: { id: productId }
+  });
+
+  if (!existingProduct) {
+    return res.status(404).json({
+      status: 'error',
+      message: 'Product not found',
     })
   }
 

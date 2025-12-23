@@ -13,7 +13,7 @@ export const authMiddleware = (req, res, next) => {
     
     jwt.verify(accessToken, secretKey, async (err, decoded) => {
         if (err) {
-            return res.status(401).json({ status: 'error', message: 'Unauthorized11' });
+            return res.status(401).json({ status: 'error', message: 'Unauthorized' });
         }
 
         const userId = decoded.sub;

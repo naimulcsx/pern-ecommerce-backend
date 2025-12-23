@@ -4,9 +4,9 @@ import { prisma } from "../database/prisma.js";
 const calculateTotalAmount = (cartItems) => {
   let total = 0;
   for (const item of cartItems) {
-    const originalPrice = item.product.originalPrice;
+    const basePrice = item.product.basePrice;
     const variantPrice = item.variant ? item.variant.priceAdjustment : 0;
-    const price = originalPrice + variantPrice;
+    const price = basePrice + variantPrice;
     total += price * item.quantity;
   }
   return total;
@@ -92,13 +92,14 @@ export const createOrder = async (req, res) => {
 // }
     const orderItemsData = cart.cartItems.map((item) => {
 
-      const originalPrice = item.product.originalPrice;
+      const basePrice = item.product.basePrice;
       const variantPrice = item.variant ? item.variant.priceAdjustment : 0;
-      const price = originalPrice + variantPrice;
+      const price = basePrice + variantPrice;
 
       const productSnapshot = {
         id: item.product.id,
         title: item.product.title,
+        basePrice: item.product.basePrice,
         originalPrice: item.product.originalPrice,
         description: item.product.description,
       };
@@ -126,30 +127,30 @@ export const createOrder = async (req, res) => {
       data: orderItemsData,
     });
 
-    // // update the stock
-    // for (const item of cart.cartItems) {
-    //   if (item.variantId) {
-    //     // reduce variant stock
-    //     await txPrisma.productVariant.update({
-    //       where: { id: item.variantId },
-    //       data: {
-    //         stock: {
-    //           decrement: item.quantity,
-    //         },
-    //       },
-    //     });
-    //   } else {
-    //     // reduce product stock
-    //     await txPrisma.product.update({
-    //       where: { id: item.productId },
-    //       data: {
-    //         stock: {
-    //           decrement: item.quantity,
-    //         },
-    //       },
-    //     });
-    //   }
-    // }
+    // update the stock
+    for (const item of cart.cartItems) {
+      if (item.variantId) {
+        // reduce variant stock
+        await txPrisma.productVariant.update({
+          where: { id: item.variantId },
+          data: {
+            stockQuantity: {
+              decrement: item.quantity,
+            },
+          },
+        });
+      } else {
+        // reduce product stock
+        await txPrisma.product.update({
+          where: { id: item.productId },
+          data: {
+            stockQuantity: {
+              decrement: item.quantity,
+            },
+          },
+        });
+      }
+    }
 
     // clear the cart
     await txPrisma.cartItem.deleteMany({
@@ -173,17 +174,16 @@ export const getOrders = async (req, res) => {
     where: {
       userId: userId,
     },
-    // include: {
-    //   orderItems: {
-    //     include: {
-    //       product: true,
-    //       variant: true
-    //     }
-    //   }
-    // },
-    // orderBy: {
-    //   createdAt: 'desc'
-    // }
+    include: {
+      orderItems: {
+        include: {
+          product: true
+        }
+      }
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
   });
   res.json({
     status: "success",
@@ -201,15 +201,21 @@ export const getOrderById = async (req, res) => {
       id: orderId,
       userId: userId,
     },
-    // include: {
-    //   orderItems: {
-    //     include: {
-    //       product: true,
-    //       variant: true
-    //     }
-    //   }
-    // }
+    include: {
+      orderItems: {
+        include: {
+          product: true
+        }
+      }
+    }
   });
+
+  if (!order) {
+    return res.status(404).json({
+      status: "error",
+      message: "Order not found",
+    });
+  }
 
   res.json({
     status: "success",
@@ -218,9 +224,84 @@ export const getOrderById = async (req, res) => {
   });
 };
 
-// todo: implement update order functionality
 export const updateOrder = async (req, res) => {
-  res.json({ message: "Update order" });
+  const orderId = req.params.id;
+  const userId = req.user.id;
+  const userRole = req.user.role;
+  const { status, paymentStatus } = req.body;
+
+  const updateOrderSchema = z.object({
+    status: z.enum(["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]).optional(),
+    paymentStatus: z.enum(["PENDING", "PAID", "FAILED"]).optional(),
+  });
+
+  const { success, data, error } = updateOrderSchema.safeParse({ status, paymentStatus });
+
+  if (!success) {
+    return res.status(400).json({
+      status: "error",
+      message: "Invalid input",
+      errors: error.errors,
+    });
+  }
+
+  // find the order
+  const order = await prisma.order.findUnique({
+    where: {
+      id: orderId,
+    },
+  });
+
+  if (!order) {
+    return res.status(404).json({
+      status: "error",
+      message: "Order not found",
+    });
+  }
+
+  // only allow admin to update order status, or the user who owns the order to cancel
+  if (userRole !== "ADMIN" && order.userId !== userId) {
+    return res.status(403).json({
+      status: "error",
+      message: "Forbidden: You don't have permission to update this order",
+    });
+  }
+
+  // customers can only cancel their own orders (not change status/payment)
+  if (userRole !== "ADMIN") {
+    if (data.status && data.status !== "CANCELLED") {
+      return res.status(403).json({
+        status: "error",
+        message: "Forbidden: Customers can only cancel orders",
+      });
+    }
+    if (data.paymentStatus) {
+      return res.status(403).json({
+        status: "error",
+        message: "Forbidden: Customers cannot update payment status",
+      });
+    }
+  }
+
+  const updateData = {};
+  if (data.status) updateData.status = data.status;
+  if (data.paymentStatus) updateData.paymentStatus = data.paymentStatus;
+
+  const updatedOrder = await prisma.order.update({
+    where: {
+      id: orderId,
+    },
+    data: updateData,
+    include: {
+      orderItems: true,
+    },
+  });
+
+  res.json({
+    status: "success",
+    message: "Order updated successfully",
+    order: updatedOrder,
+  });
 };
 
 export const deleteOrder = async (req, res) => {
