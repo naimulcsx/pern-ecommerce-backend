@@ -4,6 +4,7 @@ import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoute.js';
 import productRoute from './routes/products/index.js';
 import cartRoute from './routes/cartRoute.js';
+import orderRoutes from './routes/orderRoutes.js';
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use('/users', userRoutes);
 app.use('/category', categoryRoutes); 
 app.use('/product', productRoute);
 app.use('/cart', cartRoute);
+app.use('/order', orderRoutes);
 
 // handle not found routes
 app.use((req, res, next) => {

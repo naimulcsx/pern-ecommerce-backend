@@ -35,8 +35,13 @@ export const getCart = async (req, res) => {
       userId: userId,
     },
     include: {
-      cartItems: true,
-    },
+      cartItems: {
+        include: {
+          product: true,
+          variant: true
+        }
+      }
+    }
   });
 
   if (existingCart) {
