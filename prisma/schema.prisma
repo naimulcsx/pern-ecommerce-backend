@@ -13,15 +13,11 @@ datasource db {
   provider = "postgresql"
 }
 
-// Table users {
-//    id UUID [pk, default: `uuid_generate_v4()`]
-//    email VARCHAR(255) [not null, unique, note: "User's email address (login identifier)"]
-//    first_name VARCHAR(100) [not null]
-//    last_name VARCHAR(100) [not null]
-//    password_hash VARCHAR(255) [not null, note: "Hashed password"]
-//    created_at TIMESTAMP [not null, default: `NOW()`]
-//    updated_at TIMESTAMP [not null, default: `NOW()`]
-// }
+enum UserRole {
+  ADMIN
+  CUSTOMER
+}
+
 
 model User {
   id String @id @default(uuid()) @db.Uuid()
@@ -31,4 +27,149 @@ model User {
   passwordHash String @db.VarChar(255)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  role UserRole @default(CUSTOMER)
+  cart Cart[]
+  orders Order[]
+}
+
+
+model Product {
+  id String @id @default(uuid()) @db.Uuid()
+  title String @db.VarChar(255)
+  slug String @unique @db.VarChar(255)
+  description String @db.Text()
+  basePrice Float
+  originalPrice Float?
+  stockQuantity Int @default(0)
+  specifications Json
+  isFeatured Boolean @default(false)
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  categoryId String @db.Uuid()
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  images ProductImage[]
+  variants ProductVariant[]
+  cartItems CartItem[]
+  orderItems OrderItem[]
+}
+
+
+model Category {
+  id String @id @default(uuid()) @db.Uuid()
+  name String @db.VarChar(100)
+  slug String @unique @db.VarChar(255)
+  description String @db.Text()
+  imageUrl String @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parentId String? @db.Uuid()
+  parent Category? @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: Cascade)
+  subcategories Category[] @relation("CategoryToCategory")
+
+  products Product[]
+
+}
+
+
+model ProductImage {
+  id String @id @default(uuid()) @db.Uuid()
+  productId String @db.Uuid()
+  imageUrl String @db.VarChar(255)
+  altText String? @db.VarChar(255)
+  displayOrder Int @default(0)
+  isPrimary Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+
+model ProductVariant {
+  id String @id @default(uuid()) @db.Uuid()
+  productId String @db.Uuid()
+  variantName String @db.VarChar(50)
+  variantValue String @db.VarChar(50)
+  priceAdjustment Float @default(0.00)
+  stockQuantity Int @default(0)
+  imageUrl String? @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+}
+
+model Cart {
+  id String @id @default(uuid()) @db.Uuid()
+  userId String? @db.Uuid()
+  sessionId String? @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+}
+
+
+model CartItem {
+  id String @id @default(uuid()) @db.Uuid()
+  cartId String @db.Uuid()
+  productId String @db.Uuid()
+  variantId String? @db.Uuid()
+  quantity Int @default(1)
+  addedAt DateTime @default(now())
+
+  cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+}
+
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum paymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model Order {
+  id String @id @default(uuid()) @db.Uuid()
+  userId String @db.Uuid()
+  status OrderStatus @default(PENDING)
+  totalAmount Float
+  shippingAddressSnapshot Json
+  paymentMethod String @db.VarChar(50)
+  paymentStatus paymentStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id String @id @default(uuid()) @db.Uuid()
+  orderId String @db.Uuid()
+  productId String? @db.Uuid()
+  productSnapshot Json
+  variantSnapshot Json?
+  quantity Int
+  priceAtPurchase Float
+  totalPrice Float
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 }

@@ -1,0 +1,1035 @@
+{
+	"info": {
+		"_postman_id": "pern-ecommerce-api-collection",
+		"name": "PERN E-commerce API",
+		"description": "Complete API collection for PERN E-commerce Backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "categoryId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "productId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "variantId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cartItemId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "orderId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "imageId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"description": "Authentication endpoints for user registration, login, and profile",
+			"item": [
+				{
+					"name": "Sign Up",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.user) {",
+									"    pm.collectionVariables.set('userId', jsonData.data.user.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/sign-up",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "sign-up"]
+						},
+						"description": "Register a new user account"
+					},
+					"response": []
+				},
+				{
+					"name": "Sign In",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.accessToken) {",
+									"    pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+									"}",
+									"if (jsonData.data && jsonData.data.user) {",
+									"    pm.collectionVariables.set('userId', jsonData.data.user.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/sign-in",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "sign-in"]
+						},
+						"description": "Login with email and password to get access token"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "me"]
+						},
+						"description": "Get current authenticated user's profile"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"description": "User management endpoints",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["users"]
+						},
+						"description": "Get list of all users"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "{{userId}}"]
+						},
+						"description": "Get a specific user by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Jane\",\n    \"lastName\": \"Smith\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "{{userId}}"]
+						},
+						"description": "Update user details"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "{{userId}}"]
+						},
+						"description": "Delete a user by ID"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"description": "Product category management endpoints",
+			"item": [
+				{
+					"name": "Get All Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/category",
+							"host": ["{{baseUrl}}"],
+							"path": ["category"]
+						},
+						"description": "Get list of all categories"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/category/{{categoryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["category", "{{categoryId}}"]
+						},
+						"description": "Get a specific category by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.category) {",
+									"    pm.collectionVariables.set('categoryId', jsonData.data.category.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Electronics\",\n    \"slug\": \"electronics\",\n    \"description\": \"Electronic devices and gadgets\",\n    \"imageUrl\": \"https://example.com/electronics.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/category",
+							"host": ["{{baseUrl}}"],
+							"path": ["category"]
+						},
+						"description": "Create a new category (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Subcategory (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Smartphones\",\n    \"slug\": \"smartphones\",\n    \"description\": \"Mobile phones and smartphones\",\n    \"imageUrl\": \"https://example.com/smartphones.jpg\",\n    \"parentId\": \"{{categoryId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/category",
+							"host": ["{{baseUrl}}"],
+							"path": ["category"]
+						},
+						"description": "Create a subcategory under a parent category (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Electronics & Gadgets\",\n    \"description\": \"Updated description for electronics category\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/category/{{categoryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["category", "{{categoryId}}"]
+						},
+						"description": "Update an existing category (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/category/{{categoryId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["category", "{{categoryId}}"]
+						},
+						"description": "Delete a category (Admin only)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"description": "Product management endpoints",
+			"item": [
+				{
+					"name": "Get All Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/product",
+							"host": ["{{baseUrl}}"],
+							"path": ["product"]
+						},
+						"description": "Get list of all products"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/product/{{productId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "{{productId}}"]
+						},
+						"description": "Get a specific product by ID with category, images, and variants"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.product) {",
+									"    pm.collectionVariables.set('productId', jsonData.data.product.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"iPhone 15 Pro\",\n    \"slug\": \"iphone-15-pro\",\n    \"description\": \"The latest iPhone with advanced features and A17 Pro chip\",\n    \"basePrice\": 999.99,\n    \"originalPrice\": 1099.99,\n    \"stockQuantity\": 100,\n    \"specifications\": {\n        \"display\": \"6.1-inch Super Retina XDR\",\n        \"chip\": \"A17 Pro\",\n        \"camera\": \"48MP Main\",\n        \"battery\": \"All-day battery life\"\n    },\n    \"isFeatured\": true,\n    \"isActive\": true,\n    \"categoryId\": \"{{categoryId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product",
+							"host": ["{{baseUrl}}"],
+							"path": ["product"]
+						},
+						"description": "Create a new product (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"iPhone 15 Pro Max\",\n    \"basePrice\": 1199.99,\n    \"stockQuantity\": 50,\n    \"isFeatured\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product/{{productId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "{{productId}}"]
+						},
+						"description": "Update an existing product (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product/{{productId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "{{productId}}"]
+						},
+						"description": "Delete a product (Admin only)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product Variants",
+			"description": "Product variant management endpoints (e.g., colors, sizes)",
+			"item": [
+				{
+					"name": "Get All Variants",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/product/variant",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "variant"]
+						},
+						"description": "Get list of all product variants"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Variant By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/product/variant/{{variantId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "variant", "{{variantId}}"]
+						},
+						"description": "Get a specific variant by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Variant (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.id) {",
+									"    pm.collectionVariables.set('variantId', jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productId\": \"{{productId}}\",\n    \"variantName\": \"Color\",\n    \"variantValue\": \"Space Black\",\n    \"priceAdjustment\": 0,\n    \"stockQuantity\": 25,\n    \"imageUrl\": \"https://example.com/iphone-black.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product/variant",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "variant"]
+						},
+						"description": "Create a new product variant (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Variant - Storage Option (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productId\": \"{{productId}}\",\n    \"variantName\": \"Storage\",\n    \"variantValue\": \"256GB\",\n    \"priceAdjustment\": 100,\n    \"stockQuantity\": 30\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product/variant",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "variant"]
+						},
+						"description": "Create a storage variant with price adjustment (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Variant (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"variantValue\": \"Titanium Black\",\n    \"priceAdjustment\": 50,\n    \"stockQuantity\": 20\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product/variant/{{variantId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "variant", "{{variantId}}"]
+						},
+						"description": "Update an existing variant (Admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Variant (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/product/variant/{{variantId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "variant", "{{variantId}}"]
+						},
+						"description": "Delete a variant (Admin only)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product Images",
+			"description": "Product image management endpoints",
+			"item": [
+				{
+					"name": "Get All Images",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/product/image",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "image"]
+						},
+						"description": "Get list of all product images"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Image By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/product/image/{{imageId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "image", "{{imageId}}"]
+						},
+						"description": "Get a specific image by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Image",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.id) {",
+									"    pm.collectionVariables.set('imageId', jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productId\": \"{{productId}}\",\n    \"imageUrl\": \"https://example.com/product-image-1.jpg\",\n    \"altText\": \"iPhone 15 Pro Front View\",\n    \"displayOrder\": 1,\n    \"isPrimary\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/product/image",
+							"host": ["{{baseUrl}}"],
+							"path": ["product", "image"]
+						},
+						"description": "Add a new image to a product"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cart",
+			"description": "Shopping cart management endpoints",
+			"item": [
+				{
+					"name": "Get Cart",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart"]
+						},
+						"description": "Get current user's cart with all items"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Item to Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.id) {",
+									"    pm.collectionVariables.set('cartItemId', jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productId\": \"{{productId}}\",\n    \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart/item",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart", "item"]
+						},
+						"description": "Add a product to cart (creates cart if doesn't exist)"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Item with Variant to Cart",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"productId\": \"{{productId}}\",\n    \"variantId\": \"{{variantId}}\",\n    \"quantity\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart/item",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart", "item"]
+						},
+						"description": "Add a product with specific variant to cart"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Cart Item Quantity",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": 3\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart/item/{{cartItemId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart", "item", "{{cartItemId}}"]
+						},
+						"description": "Update quantity of a cart item"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Item from Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/cart/item/{{cartItemId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart", "item", "{{cartItemId}}"]
+						},
+						"description": "Remove a specific item from cart"
+					},
+					"response": []
+				},
+				{
+					"name": "Clear Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/cart/clear",
+							"host": ["{{baseUrl}}"],
+							"path": ["cart", "clear"]
+						},
+						"description": "Remove all items from cart"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Orders",
+			"description": "Order management endpoints",
+			"item": [
+				{
+					"name": "Get All Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/order",
+							"host": ["{{baseUrl}}"],
+							"path": ["order"]
+						},
+						"description": "Get all orders for the current user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/order/{{orderId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "{{orderId}}"]
+						},
+						"description": "Get a specific order by ID with order items"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.order && jsonData.order.id) {",
+									"    pm.collectionVariables.set('orderId', jsonData.order.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shipmentAddress\": {\n        \"fullName\": \"John Doe\",\n        \"phoneNumber\": \"1234567890\",\n        \"addressLine1\": \"123 Main Street\",\n        \"addressLine2\": \"Apt 4B\"\n    },\n    \"paymentMethod\": \"credit_card\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order",
+							"host": ["{{baseUrl}}"],
+							"path": ["order"]
+						},
+						"description": "Create a new order from cart items (clears cart and updates stock)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Status (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"PROCESSING\",\n    \"paymentStatus\": \"PAID\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order/{{orderId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "{{orderId}}"]
+						},
+						"description": "Update order status (Admin: full control, Customer: can only cancel)"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Order (Customer)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"CANCELLED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order/{{orderId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "{{orderId}}"]
+						},
+						"description": "Cancel an order (Customers can only cancel their own orders)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Order (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/order/{{orderId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["order", "{{orderId}}"]
+						},
+						"description": "Delete an order (Admin only)"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
+
