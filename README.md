@@ -1,6 +1,6 @@
 # PERN E-Commerce Backend
 
-A robust e-commerce backend built with PostgreSQL, Express, React, and Node.js (PERN stack), featuring user authentication, product management, cart functionality, and order processing.
+A robust e-commerce backend built with PostgreSQL, Express, and Node.js featuring user authentication, product management, cart functionality, and order processing.
 
 ## Prerequisites
 
@@ -42,7 +42,6 @@ Then update the `.env` file with your configuration. Example:
 ```env
 DATABASE_URL="postgresql://postgres:EqUWXwsmExrl@localhost:5432/pern_ecommerce"
 JWT_SECRET="your-secret-key-here"
-PORT=3000
 ```
 
 ### 4. Start Docker Services
@@ -217,26 +216,6 @@ npx prisma migrate dev --name migration_name
 npx prisma format
 ```
 
-## Development Notes
-
-### Recent Updates (Class 7)
-
-- ✅ Created product variant & product image models
-- ✅ Established relations with product model
-- ✅ Added product image API and controller
-- ✅ Added product variant API and controller
-- ✅ Updated category model
-- ✅ Updated category controller
-- ✅ Updated product model
-- ✅ Updated product controller
-- ✅ Added cart and cart item models
-
-### TODO
-
-1. Complete the product variant controller update and delete functions
-2. Complete the product image controller update and delete functions
-3. Update the product controller update function
-4. Update the category controller update function
 
 ## Troubleshooting
 
@@ -264,22 +243,5 @@ npx prisma migrate reset
 npx prisma migrate dev
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-ISC License
-
-## Support
-
-For issues and questions, please open an issue on the GitHub repository.
-
----
 
 **Happy Coding! 🚀**
